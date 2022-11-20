@@ -1,7 +1,9 @@
 from flask import Flask
 import json 
+import random
 from config import me
 from mock_data import catalog 
+from flask import Flask, request, abort
 
 app = Flask("server")
 
@@ -46,6 +48,41 @@ def api_about():
 @app.get("/api/catalog")
 def get_catalog():
     return json.dumps(catalog)
+
+
+#POST /api/catalog
+@app.post("/api/catalog")
+def save_product():
+    product = request.get_json()
+
+    #validations
+    if "title" not in product:
+        return abort(400, "Title is required")
+
+    if len(product["title"]) < 5:
+        return abort(400, "Title requires at least 5 chars")
+
+    if "category" not in product:
+        return abort(400, "Category is required")
+
+    if "price" not in product:
+        return abort(400, "Price is required")
+
+    if not isinstance(product["price"], (float, int)):
+        return abort(400, "Price must be a valid number") 
+
+    if product["price"] < 0:
+        return abort(400, "Price must be greater than 0")
+
+
+    #assign a unique _id to product
+    product["_id"] = random.randint(1000, 10000)
+
+    catalog.append(product)
+
+    return json.dumps(product)
+
+
 
 
 @app.get("/api/test/count")
@@ -102,6 +139,17 @@ def sum_goods():
 
 
 
+@app.get("/api/product/lowestprice")
+def get_lowest_price():
+    lowestprice = catalog[0]
+    for product in catalog:
+        if product["price"] < lowestprice["price"]:
+            lowestprice = product
+        
+        return json.dumps(lowestprice)
+
+
+
 @app.get("/api/product/<id>")
 def find_product_by_id(id):
     for product in catalog:
@@ -109,6 +157,8 @@ def find_product_by_id(id):
             return json.dumps(product)
 
     return "Error: Product was not found"
+        
+
 
 
 
