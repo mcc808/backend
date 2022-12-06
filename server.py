@@ -4,6 +4,8 @@ import random
 from config import me
 from mock_data import catalog 
 from flask import Flask, request, abort
+from config import db
+from bson import ObjectId
 
 app = Flask("server")
 
@@ -47,7 +49,14 @@ def api_about():
 
 @app.get("/api/catalog")
 def get_catalog():
-    return json.dumps(catalog)
+    #read from db
+    cursor = db.Products.find({})
+    results = []
+    for prod in cursor:
+        prod["_id"] = str(prod["_id"])
+        results.append(prod)
+
+    return json.dumps(results)
 
 
 #POST /api/catalog
@@ -59,7 +68,7 @@ def save_product():
     if "title" not in product:
         return abort(400, "Title is required")
 
-    if len(product["title"]) < 5:
+    if len(product["title"]) < 4:
         return abort(400, "Title requires at least 5 chars")
 
     if "category" not in product:
@@ -75,10 +84,11 @@ def save_product():
         return abort(400, "Price must be greater than 0")
 
 
-    #assign a unique _id to product
-    product["_id"] = random.randint(1000, 10000)
-
-    catalog.append(product)
+    #save product to db
+    db.Products.insert_one(product) #save the object, will assign an _id: ObjectId(12368713287613)
+    #fix the _id value
+    
+    product["_id"] = str(product["_id"])
 
     return json.dumps(product)
 
