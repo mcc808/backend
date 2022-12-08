@@ -13,6 +13,9 @@ python3 -m pip install flask
 python3 -m venv env
 
 #activate the virtual environment
+
+flask --app server.py --debug run
+
 win:
 venv\Scripts\activate
 

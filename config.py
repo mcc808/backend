@@ -1,7 +1,7 @@
 import pymongo
 import certifi
 
-con_str = "mongodb+srv://fsdi456:password@cluster0.dpeuykk.mongodb.net/?retryWrites=true&w=majority"
+con_str = "mongodb+srv://fsdi456:SANdiego123@cluster0.dpeuykk.mongodb.net/?retryWrites=true&w=majority"
 client = pymongo.MongoClient(con_str, tlsCAFile=certifi.where())
 
 db = client.get_database("CoffeeSupply")
